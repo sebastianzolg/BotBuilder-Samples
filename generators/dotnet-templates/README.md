@@ -38,7 +38,7 @@ The Core Bot template consists of set of core features most every bot is likely 
 | [How to handle user-initiated interruptions][46] | While you may think that your users will follow your defined conversation flow, step by step, chances are good that they will change their minds or ask a question in the middle of the process instead of answering the question. Handling interruptions means making sure your bot is prepared to handle situations like this. |
 
 ### Empty Bot Template
-The Empty Bot template is the minimal skeleton code for a bot.  It provides a stub `onTurn` handler but does not perform any actions.  If you are experienced writing bots with Bot Framework v4 and want the minimum scaffolding, the Empty Bot template is for you.
+The Empty Bot template is the minimal skeleton code for a bot.  It basically displays `Hello World!` to the user when they first connect to the bot.  It doesn't do any other actions.  If you are experienced writing bots with Bot Framework v4 and want the minimum scaffolding, the Empty Bot template is for you.
 
 
 # Features by Template
@@ -46,10 +46,10 @@ The Empty Bot template is the minimal skeleton code for a bot.  It provides a st
 | --------- | :-------: | :------: | :------: |
 | Generate code in C# | X | X | X |
 | Support local development and testing using the [Bot Framework Emulator v4][3] | X | X | X |
-| Core bot message processing |  | X | X |
+| Bot message processing |  | X | X |
 | Deploy your bot to Microsoft Azure |  | X | X |
 | Welcome new users using Adaptive Card technology |  |  | X |
-| Support AI-based greetings using [LUIS][2] |  |  | X |
+| Support AI-based natural languge processing using [LUIS][2] |  |  | X |
 | Use Dialogs to manage more in-depth conversations |  |  | X |
 | Manage conversation state |  |  | X |
 | Handle user interruptions |  |  | X |
@@ -112,24 +112,23 @@ dotnet new -i Microsoft.BotFramework.CSharp.EmptyBot
 
 # Usage
 ## Creating a New Bot Project
-The `EchoBot`, `CoreBot`, and `EmptyBot` templates can generate a bot using either ASP.NET MVC or .NET Core WebAPI.  Choose a project type that is most familiar to you.  If you are new to .NET Core and ASP.NET the MVC project can be easier to learn and understand.  You must specify either `mvc` or `webapi` by using the `--project-type` option.
 
 ### Create EchoBot
 ```bash
-# Generate an Echo Bot using ASP.NET MVC
-dotnet new echobot -n MyEchoBot --project-type mvc
+# Generate an Echo Bot
+dotnet new echobot -n MyEchoBot
 ```
 
 ### Create CoreBot
 ```bash
-# Generate a Core Bot WebAPI
-dotnet new corebot -n MyCoreBot --project-type webapi
+# Generate a Core Bot
+dotnet new corebot -n MyCoreBot
 ```
 
 ### Create EmptyBot
 ```bash
-# Generate an Empty Bot using ASP.NET MVC
-dotnet new emptybot -n MyEmptyBot --project-type mvc
+# Generate an Empty Bot
+dotnet new emptybot -n MyEmptyBot
 ```
 
 ## Overridding .NET Core 2.2 Dependencies
@@ -140,13 +139,13 @@ Here are some different examples that show how to specify different .NET Core de
 ### Example Creating EchoBot Using .NET Core 2.1
 ```bash
 # Generate an Echo Bot (netcoreapp2.1)
-dotnet new echobot --framework netcoreapp2.1 -n MyEchoBot --project-type mvc
+dotnet new echobot --framework netcoreapp2.1 -n MyEchoBot
 ```
 
 ### Example Creating CoreBot Using .NET Core 2.0
 ```bash
 # Generate an Core Bot (netcoreapp2.0)
-dotnet new corebot --framework netcoreapp2.0 -n MyCoreBot --project-type mvc
+dotnet new corebot --framework netcoreapp2.0 -n MyCoreBot
 ```
 
 # Running Your Bot
@@ -164,7 +163,7 @@ dotnet run
 ```
 
 ## Interacting With Your Bot Using the Emulator
-Launch the [Bot Framework Emulator v4][3] and open the generated project's `.bot` file.
+Launch the [Bot Framework Emulator v4][3] and connect to the bot's url `http://localhost:3978/api/messages`
 
 Once the Emulator is connected, you can interact with and receive messages from your bot.
 
