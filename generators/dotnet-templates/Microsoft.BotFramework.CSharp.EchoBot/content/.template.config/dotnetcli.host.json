@@ -5,10 +5,6 @@
             "longName": "framework",
             "shortName": ""
         },
-        "ProjectType": {
-            "longName": "project-type",
-            "shortName": "pt"
-        },
         "SkipRestore": {
             "longName": "no-restore",
             "shortName": ""
@@ -16,7 +12,6 @@
     },
     "usageExamples": [
         "--framework netcoreapp2.1",
-        "--project-type mvc",
         "--no-restore true"
     ]
 }
