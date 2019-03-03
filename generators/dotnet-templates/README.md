@@ -132,7 +132,7 @@ dotnet new emptybot -n MyEmptyBot
 ```
 
 ## Overridding .NET Core 2.2 Dependencies
-The templates default to using .NET Core 2.2.x.  This can be overridden on the command line by using the `--framework` option. The current templates support `netcoreapp2.0`, `netcoreapp2.1`, and `netcoreapp2.2` (the default).
+The templates default to using .NET Core 2.2.x.  This can be overridden on the command line by using the `--framework` option. The current templates support `netcoreapp2.1`, and `netcoreapp2.2` (the default).
 
 Here are some different examples that show how to specify different .NET Core dependencies:
 
@@ -142,10 +142,10 @@ Here are some different examples that show how to specify different .NET Core de
 dotnet new echobot --framework netcoreapp2.1 -n MyEchoBot
 ```
 
-### Example Creating CoreBot Using .NET Core 2.0
+### Example Creating CoreBot Using .NET Core 2.2
 ```bash
 # Generate an Core Bot (netcoreapp2.0)
-dotnet new corebot --framework netcoreapp2.0 -n MyCoreBot
+dotnet new corebot --framework netcoreapp2.2 -n MyCoreBot
 ```
 
 # Running Your Bot
