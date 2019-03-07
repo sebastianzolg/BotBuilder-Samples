@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 
-namespace Microsoft.Bot.Builder.EchoBot
+namespace Microsoft.Bot.Builder.Samples.EchoBot
 {
     public class EchoBot : ActivityHandler
     {

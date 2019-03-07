@@ -4,7 +4,7 @@ Bot Framework v4 echo bot sample.
 This bot has been created using [Bot Framework][1], it shows how to create a simple bot that accepts input from the user and echoes it back.
 
 ## Prerequisites
-- [.NET Core SDK][4] version 2.2 or higher
+- [.NET Core SDK][4] version __NETCORE_VERSION__
 	```bash
 	# determine dotnet version
 	dotnet --version

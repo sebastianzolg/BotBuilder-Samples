@@ -4,12 +4,12 @@
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 
-namespace Microsoft.Bot.Builder.EchoBot
+namespace Microsoft.Bot.Builder.Samples.EchoBot
 {
     public class ConfigurationCredentialProvider : SimpleCredentialProvider
     {
         public ConfigurationCredentialProvider(IConfiguration configuration)
-            : base(configuration["BotFramework:AppId"], configuration["BotFramework:Password"])
+            : base(configuration["MicrosoftAppId"], configuration["MicrosoftAppPassword"])
         {
         }
     }
