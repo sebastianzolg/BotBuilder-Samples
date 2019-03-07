@@ -8,7 +8,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.BotBuilderSamples
+namespace Microsoft.Bot.Builder.Samples.CoreBot
 {
     // This IBot implementation can run any type of Dialog. The use of type parameterization is to allows multiple different bots
     // to be run at different endpoints within the same project. This can be achieved by defining distinct Controller types
@@ -17,10 +17,10 @@ namespace Microsoft.BotBuilderSamples
     // and the requirement is that all BotState objects are saved at the end of a turn.
     public class DialogBot<T> : ActivityHandler where T : Dialog
     {
-        private BotState _conversationState;
-        private BotState _userState;
-        private Dialog _dialog;
-        private ILogger _logger;
+        private readonly Dialog _dialog;
+        protected readonly BotState _conversationState;
+        protected readonly BotState _userState;
+        protected readonly ILogger _logger;
 
         public DialogBot(ConversationState conversationState, UserState userState, T dialog, ILogger<DialogBot<T>> logger)
         {

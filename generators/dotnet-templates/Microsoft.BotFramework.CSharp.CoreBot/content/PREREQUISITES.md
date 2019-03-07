@@ -8,7 +8,7 @@ This bot uses [LUIS][1], an AI based cognitive service, to implement language un
 
 ## Prerequisites
 ### Install .NET Core and CLI Tooling
-- [.NET Core SDK][4] version 2.2 or higher
+- [.NET Core SDK][4] version __NETCORE_VERSION__
 	```bash
 	# determine dotnet version
 	dotnet --version
@@ -58,6 +58,7 @@ Bot configuration settings are stored in `__PROJECT_NAME__/appsettings.json`.  T
         "Luis-Booking-Region": ""
     }
 ```
+To find these settings, click the `Manage` button.
 
 - The `Application ID` can be found in `Application Information` page.
 - The `Authoring Key` can be found in `Keys and Endpoints` page.
