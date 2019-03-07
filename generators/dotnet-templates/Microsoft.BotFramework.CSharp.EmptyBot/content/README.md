@@ -4,7 +4,7 @@ Bot Framework v4 empty bot sample.
 This bot has been created using [Bot Framework][1], it shows the minimum code required to build a bot.
 
 ## Prerequisites
-- [.NET Core SDK][4] version 2.2 or higher
+- [.NET Core SDK][4] version __NETCORE_VERSION__
 	```bash
 	# determine dotnet version
 	dotnet --version

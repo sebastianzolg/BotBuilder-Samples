@@ -10,7 +10,7 @@
   "defaultName": "EmptyBot",
   "groupIdentity": "Microsoft.BotFramework.CSharp.EmptyBot",
   "identity": "Microsoft.BotFramework.CSharp.EmptyBot",
-  "name": "Bot Framework Empty Bot (v0.2.2)",
+  "name": "Bot Framework Empty Bot (v0.3.0)",
   "preferNameDirectory": true,
   "sourceName": "Microsoft.Bot.Builder.EmptyBot",
   "shortName": "emptybot",
@@ -24,7 +24,7 @@
       "type": "generated",
       "generator": "constant",
       "parameters": {
-        "value": "v0.2.2"
+        "value": "v0.3.0"
       },
       "replaces": "vX.X.X"
     },
@@ -65,30 +65,30 @@
         "cases": [
           {
             "condition": "(Framework==\"netcoreapp2.2\")",
-            "value": "\"Microsoft.AspNetCore\" Version=\"2.2.0\""
+            "value": "'Microsoft.AspNetCore' Version='2.2.0'"
           },
           {
             "condition": "(Framework==\"netcoreapp2.1\")",
-            "value": "\"Microsoft.AspNetCore\" Version=\"2.1.6\""
+            "value": "'Microsoft.AspNetCore' Version='2.1.6'"
           }
         ]
       }
     },
-    "AspCoreAllAssemblyVersion": {
+    "ReadmeNetCorePrereqVersion": {
       "type":"generated",
       "generator": "switch",
       "dataType": "string",
-      "replaces": "__MICROSOFT_ASPNETCORE_ALL_VERSION__",
+      "replaces": "__NETCORE_VERSION__",
       "parameters": {
         "evaluator": "C++",
         "cases": [
           {
             "condition": "(Framework==\"netcoreapp2.2\")",
-            "value": "\"Microsoft.AspNetCore.All\""
+            "value": "2.2"
           },
           {
             "condition": "(Framework==\"netcoreapp2.1\")",
-            "value": "\"Microsoft.AspNetCore.All\""
+            "value": "2.1"
           }
         ]
       }
