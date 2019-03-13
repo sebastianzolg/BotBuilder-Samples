@@ -10,7 +10,7 @@ using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Bot.Builder.EmptyBot
+namespace Microsoft.BotFramework.EmptyBot
 {
     public class Startup
     {
@@ -33,7 +33,7 @@ namespace Microsoft.Bot.Builder.EmptyBot
             services.AddSingleton<IBotFrameworkHttpAdapter, BotFrameworkHttpAdapter>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
-            services.AddTransient<IBot, EchoBot>();
+            services.AddTransient<IBot, EmptyBot>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
