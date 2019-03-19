@@ -33,6 +33,7 @@ namespace Microsoft.BotBuilderSamples
 
         private const string LoginPromptName = "loginPrompt";
         private const string ConfirmPromptName = "confirmPrompt";
+        private const string ConfirmPromptPhase2Name = "confirmPromptPhase2";
 
         private const string WelcomeText = @"This bot will introduce you to Authentication.
                                         Type anything to get logged in. Type 'logout' to sign-out.
@@ -54,7 +55,8 @@ namespace Microsoft.BotBuilderSamples
             // Add the OAuth prompts and related dialogs into the dialog set
             _dialogs.Add(Prompt(ConnectionName));
             _dialogs.Add(new ConfirmPrompt(ConfirmPromptName));
-            _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync }));
+            _dialogs.Add(new ConfirmPrompt(ConfirmPromptPhase2Name));
+            _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync, DisplayTokenPhase2Async }));
         }
 
         /// <summary>
@@ -234,11 +236,38 @@ namespace Microsoft.BotBuilderSamples
                 // There is no reason to store the token locally in the bot because we can always just call
                 // the OAuth prompt to get the token or get a new token if needed.
                 var prompt = await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+
+                // BUG: The following line is never hit as BeginDialogAsync and the OAuthPrompt in particular
+                // ending the current waterfall step and proceeding with the next waterfall stept.
                 var tokenResponse = (TokenResponse)prompt.Result;
                 if (tokenResponse != null)
                 {
                     await step.Context.SendActivityAsync($"Here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
                 }
+            }
+
+            return await step.PromptAsync(
+                ConfirmPromptPhase2Name,
+                new PromptOptions
+                {
+                    Prompt = MessageFactory.Text("Are you really, really sure?"),
+                    Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
+                },
+                cancellationToken);
+        }
+
+        private static async Task<DialogTurnResult> DisplayTokenPhase2Async(WaterfallStepContext step, CancellationToken cancellationToken)
+        {
+            // BUG: Here we assume the choice response from Step DisplayTokenAsync but getting the token response instead
+            // which leads to a cast exception.
+            // Event if we assume this behaviour here, there is no way of getting the result from the previous choice step.
+            var result = (bool)step.Result;
+            if (result)
+            {
+                var prompt = await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+                var tokenResponse = (TokenResponse)prompt.Result;
+
+                await step.Context.SendActivityAsync($"Again, here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
             }
 
             return Dialog.EndOfTurn;
