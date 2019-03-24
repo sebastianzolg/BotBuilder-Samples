@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AuthenticationBot;
 using Bot_Authentication;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
@@ -31,7 +32,6 @@ namespace Microsoft.BotBuilderSamples
         // your Bot Channels Registration on the settings blade in Azure.
         private const string ConnectionName = "";
 
-        private const string LoginPromptName = "loginPrompt";
         private const string ConfirmPromptName = "confirmPrompt";
         private const string ConfirmPromptPhase2Name = "confirmPromptPhase2";
 
@@ -53,10 +53,10 @@ namespace Microsoft.BotBuilderSamples
             _dialogs = new DialogSet(_stateAccessors.ConversationDialogState);
 
             // Add the OAuth prompts and related dialogs into the dialog set
-            _dialogs.Add(Prompt(ConnectionName));
+            _dialogs.Add(new AuthenticationDialog(ConnectionName));
             _dialogs.Add(new ConfirmPrompt(ConfirmPromptName));
             _dialogs.Add(new ConfirmPrompt(ConfirmPromptPhase2Name));
-            _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync, DisplayTokenPhase2Async }));
+            _dialogs.Add(new WaterfallDialog("authFlow", new WaterfallStep[] { LoginFirstTimeStepAsync, LoggedInStepAsync, AquireFreshTokenStepAsync, DisplayFreshlyAquiredTokenAsync, DisplayTokenPhase2Async }));
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Microsoft.BotBuilderSamples
                     if (!turnContext.Responded)
                     {
                         // Start the Login process.
-                        await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
+                        await dc.BeginDialogAsync("authFlow", cancellationToken: cancellationToken);
                     }
 
                     break;
@@ -156,22 +156,15 @@ namespace Microsoft.BotBuilderSamples
         }
 
         /// <summary>
-        /// Prompts the user to login using the OAuth provider specified by the connection name.
+        /// This <see cref="WaterfallStep"/> prompts the user to log in.
         /// </summary>
-        /// <param name="connectionName"> The name of your connection. It can be found on Azure in
-        /// your Bot Channels Registration on the settings blade. </param>
-        /// <returns> An <see cref="OAuthPrompt"/> the user may use to log in.</returns>
-        private static OAuthPrompt Prompt(string connectionName)
+        /// <param name="step">A <see cref="WaterfallStepContext"/> provides context for the current waterfall step.</param>
+        /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
+        /// or threads to receive notice of cancellation.</param>
+        /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
+        private static async Task<DialogTurnResult> LoginFirstTimeStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
         {
-            return new OAuthPrompt(
-                LoginPromptName,
-                new OAuthPromptSettings
-                {
-                    ConnectionName = connectionName,
-                    Text = "Please Sign In",
-                    Title = "Sign In",
-                    Timeout = 300000, // User has 5 minutes to login (1000 * 60 * 5)
-                });
+            return await step.BeginDialogAsync(nameof(AuthenticationDialog), cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -181,9 +174,11 @@ namespace Microsoft.BotBuilderSamples
         /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
-        private static async Task<DialogTurnResult> PromptStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> AquireFreshTokenStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
         {
-            return await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+            // There is no difference between LoginFirstTimeStepAsync but we're passing the previous step result as options to the AuthFlow
+            // so we can maintain it for the next regular step in the waterfall
+            return await step.BeginDialogAsync(nameof(AuthenticationDialog), step.Result, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -193,11 +188,12 @@ namespace Microsoft.BotBuilderSamples
         /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
-        private static async Task<DialogTurnResult> LoginStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> LoggedInStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
         {
             // Get the token from the previous step. Note that we could also have gotten the
             // token directly from the prompt itself. There is an example of this in the next method.
-            var tokenResponse = (TokenResponse)step.Result;
+            var authResponse = (AuthenticationStepResult)step.Result;
+            var tokenResponse = authResponse.TokenResponse;
             if (tokenResponse != null)
             {
                 await step.Context.SendActivityAsync("You are now logged in.", cancellationToken: cancellationToken);
@@ -222,52 +218,34 @@ namespace Microsoft.BotBuilderSamples
         /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
-        private static async Task<DialogTurnResult> DisplayTokenAsync(WaterfallStepContext step, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> DisplayFreshlyAquiredTokenAsync(WaterfallStepContext step, CancellationToken cancellationToken)
         {
-            var result = (bool)step.Result;
+            var authResult = (AuthenticationStepResult)step.Result;
+
+            // Verify user want's to display the token
+            var result = (bool)authResult.StepResult;
             if (result)
             {
-                // Call the prompt again because we need the token. The reasons for this are:
-                // 1. If the user is already logged in we do not need to store the token locally in the bot and worry
-                // about refreshing it. We can always just call the prompt again to get the token.
-                // 2. We never know how long it will take a user to respond. By the time the
-                // user responds the token may have expired. The user would then be prompted to login again.
-                //
-                // There is no reason to store the token locally in the bot because we can always just call
-                // the OAuth prompt to get the token or get a new token if needed.
-                var prompt = await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
-
-                // BUG: The following line is never hit as BeginDialogAsync and the OAuthPrompt in particular
-                // ending the current waterfall step and proceeding with the next waterfall stept.
-                var tokenResponse = (TokenResponse)prompt.Result;
-                if (tokenResponse != null)
-                {
-                    await step.Context.SendActivityAsync($"Here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
-                }
+                // We not just show the previous token, instead we aquire a fresh one once again.
+                var prompt = await step.BeginDialogAsync(nameof(AuthenticationDialog), result, cancellationToken: cancellationToken);
             }
 
-            return await step.PromptAsync(
-                ConfirmPromptPhase2Name,
-                new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Are you really, really sure?"),
-                    Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
-                },
-                cancellationToken);
+            return Dialog.EndOfTurn;
         }
 
         private static async Task<DialogTurnResult> DisplayTokenPhase2Async(WaterfallStepContext step, CancellationToken cancellationToken)
         {
-            // BUG: Here we assume the choice response from Step DisplayTokenAsync but getting the token response instead
-            // which leads to a cast exception.
-            // Event if we assume this behaviour here, there is no way of getting the result from the previous choice step.
-            var result = (bool)step.Result;
+            var authResult = step.Result as AuthenticationStepResult;
+
+            // This is the result of the step before the authentication flow. This way we have access to it and don't need to reprompt
+            // after we aquired a fresh access token.
+            var result = (bool)authResult.StepResult;
+
             if (result)
             {
-                var prompt = await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
-                var tokenResponse = (TokenResponse)prompt.Result;
+                var tokenResponse = authResult.TokenResponse;
 
-                await step.Context.SendActivityAsync($"Again, here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
+                await step.Context.SendActivityAsync($"Here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
             }
 
             return Dialog.EndOfTurn;
