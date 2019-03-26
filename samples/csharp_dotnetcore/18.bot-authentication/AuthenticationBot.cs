@@ -73,6 +73,7 @@ namespace Microsoft.BotBuilderSamples
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
             var dc = await _dialogs.CreateContextAsync(turnContext, cancellationToken);
+            
             if (turnContext == null)
             {
                 throw new ArgumentNullException(nameof(turnContext));
@@ -84,6 +85,13 @@ namespace Microsoft.BotBuilderSamples
 
                     // This bot is not case sensitive.
                     var text = turnContext.Activity.Text.ToLowerInvariant();
+                    if (text == "end")
+                    {
+                        await dc.CancelAllDialogsAsync();
+                        await _stateAccessors.ConversationDialogState.DeleteAsync(turnContext, cancellationToken);
+                        break;
+                    }
+
                     if (text == "help")
                     {
                         await turnContext.SendActivityAsync(WelcomeText, cancellationToken: cancellationToken);
